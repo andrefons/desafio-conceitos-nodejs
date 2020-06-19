@@ -5,8 +5,18 @@ const { uuid, isUuid } = require("uuidv4");
 
 const app = express();
 
+function validateId(request, response, next) {
+  const { id } = request.params;
+  console.log(`validateId [${request.method}]`);
+  if (!isUuid(id))
+    return response.status(400).json({ error: "Invalid repository ID" });
+
+  return next();
+}
+
 app.use(express.json());
 app.use(cors());
+app.use('/repositories/:id', validateId);
 
 const repositories = [];
 
@@ -37,9 +47,6 @@ app.put("/repositories/:id", (request, response) => {
   const { id } = request.params;
   const { url, title, techs } = request.body;
 
-  if (!isUuid(id))
-    return response.status(400).json({ error: "Invalid repository ID" });
-
   const index = repositories.findIndex(repository => repository.id == id);
 
   if (index < 0)
@@ -61,9 +68,6 @@ app.put("/repositories/:id", (request, response) => {
 app.delete("/repositories/:id", (request, response) => {
   const { id } = request.params;
 
-  if (!isUuid(id))
-    return response.status(400).json({ error: "Invalid repository ID" });
-
   const index = repositories.findIndex(repository => repository.id == id);
 
   if (index < 0)
@@ -76,11 +80,7 @@ app.delete("/repositories/:id", (request, response) => {
 
 app.post("/repositories/:id/like", (request, response) => {
   // TODO
-
   const { id } = request.params;
-
-  if (!isUuid(id))
-    return response.status(400).json({ error: "Invalid repository ID" });
 
   const index = repositories.findIndex(repository => repository.id == id);
 
